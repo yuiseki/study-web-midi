@@ -27,6 +27,9 @@ function App() {
   );
   const [midiInputs, setMIDIInputs] = useState<MIDIInput[]>([]);
   const [midiOutputs, setMIDIOutputs] = useState<MIDIOutput[]>([]);
+  const [youtubeVideoId, setYoutubeVideoId] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (!callOnce.current) {
@@ -185,6 +188,12 @@ function App() {
           index: event.data[1] - 25,
           type: 0,
         });
+        if (event.data[1] - 25 === 11) {
+          setYoutubeVideoId("dQw4w9WgXcQ");
+        }
+        if (event.data[1] - 25 === 12) {
+          setYoutubeVideoId("-qm27ekNEOM");
+        }
       }
     };
 
@@ -195,6 +204,25 @@ function App() {
 
   return (
     <>
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          zIndex: -1,
+        }}
+      >
+        {youtubeVideoId && (
+          <iframe
+            width="1280"
+            height="720"
+            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&controls=0&iv_load_policy=3&modestbranding=1&showinfo=0&loop=1&rel=0&playlist=${youtubeVideoId}`}
+            title="YouTube video player"
+            frameBorder={0}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          ></iframe>
+        )}
+      </div>
       <div
         style={{
           height: "100vh",
