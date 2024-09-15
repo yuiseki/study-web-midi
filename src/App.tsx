@@ -74,30 +74,6 @@ function App() {
     }
   }, []);
 
-  // Listen to MIDI messages
-  useEffect(() => {
-    if (!midiInputs.length) {
-      return;
-    }
-
-    const onMIDIMessage = (event: MIDIMessageEvent) => {
-      console.log("onMIDIEvent", event.data);
-      if (!event.data) {
-        return;
-      }
-      // event.data[2] === 0 means note is off
-      if (event.data[2] === 0) {
-        setLastEvent(undefined);
-      } else {
-        setLastEvent(event.data);
-      }
-    };
-
-    for (let i = 0; i < midiInputs.length; i++) {
-      midiInputs[i].onmidimessage = onMIDIMessage;
-    }
-  }, [midiInputs]);
-
   const textScrolling = useCallback(
     (params: {
       // Index color, must be between 1 and 127
@@ -182,6 +158,41 @@ function App() {
     [midiOutputs]
   );
 
+  // Listen to MIDI messages
+  useEffect(() => {
+    if (!midiInputs.length) {
+      return;
+    }
+
+    const onMIDIMessage = (event: MIDIMessageEvent) => {
+      console.log("onMIDIEvent", event.data);
+      if (!event.data) {
+        return;
+      }
+      console.log(event.data[1] - 25);
+      // event.data[1] - 25 means button index
+      // event.data[2] === 0 means note is off
+      if (event.data[2] === 0) {
+        setLastEvent(undefined);
+        ledLightning({
+          index: event.data[1] - 25,
+          type: 0,
+          color: 0,
+        });
+      } else {
+        setLastEvent(event.data);
+        ledLightning({
+          index: event.data[1] - 25,
+          type: 0,
+        });
+      }
+    };
+
+    for (let i = 0; i < midiInputs.length; i++) {
+      midiInputs[i].onmidimessage = onMIDIMessage;
+    }
+  }, [ledLightning, midiInputs]);
+
   return (
     <>
       <div
@@ -192,9 +203,6 @@ function App() {
           flexDirection: "column",
           justifyContent: "flex-end",
           alignItems: "flex-end",
-          backgroundColor: lastEvent
-            ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
-            : "white",
         }}
       >
         <div>
@@ -247,6 +255,10 @@ function App() {
                       width: 60,
                       height: 60,
                       border: "1px solid black",
+                      backgroundColor:
+                        lastEvent && lastEvent[1] === parseInt(`${i}${j}`)
+                          ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
+                          : "white",
                     }}
                   >
                     {i + 1}
