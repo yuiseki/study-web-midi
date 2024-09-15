@@ -74,7 +74,12 @@ function App() {
     }
   }, []);
 
+  // Listen to MIDI messages
   useEffect(() => {
+    if (!midiInputs.length) {
+      return;
+    }
+
     const onMIDIMessage = (event: MIDIMessageEvent) => {
       console.log("onMIDIEvent", event.data);
       if (!event.data) {
@@ -95,12 +100,12 @@ function App() {
 
   const textScrolling = useCallback(
     (params: {
-      // Index color
-      color: number;
+      // Index color, must be between 1 and 127
+      color?: number;
       // Text to display
-      text: string;
+      text?: string;
       // Show loop the message
-      shouldLoop?: boolean;
+      loop?: boolean;
       // Speed, max: 7
       speed?: number;
     }) => {
@@ -108,13 +113,13 @@ function App() {
         console.error("No MIDI outputs available");
         return;
       }
-      const { color, text, shouldLoop = false, speed = 7 } = params;
+      const { color = 127, text = "unko", loop = false, speed = 7 } = params;
       const output = midiOutputs[0];
       const header = dictionary.sysEx.header;
       const footer = dictionary.sysEx.footer;
       const command = dictionary.commands.textScrolling;
       const colorValue = color;
-      const loopValue = shouldLoop ? 1 : 0;
+      const loopValue = loop ? 1 : 0;
       const speedValue = speed;
       const textBuffer = new TextEncoder().encode(text);
       const message = new Uint8Array([
@@ -129,7 +134,7 @@ function App() {
       ]);
       output.send(message);
     },
-    [dictionary, midiOutputs]
+    [midiOutputs]
   );
 
   return (
@@ -143,12 +148,16 @@ function App() {
             : "white",
         }}
       >
+        {!midiAccess && (
+          <div>
+            <p>No MIDI access</p>
+          </div>
+        )}
         <button
           onClick={() =>
             textScrolling({
-              color: 41,
               text: "unko",
-              shouldLoop: true,
+              loop: true,
               speed: 3,
             })
           }
