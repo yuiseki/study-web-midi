@@ -188,6 +188,10 @@ function App() {
         style={{
           height: "100vh",
           width: "100vw",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          alignItems: "flex-end",
           backgroundColor: lastEvent
             ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
             : "white",
