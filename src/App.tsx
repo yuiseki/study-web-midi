@@ -193,32 +193,55 @@ function App() {
             : "white",
         }}
       >
-        {!midiAccess && (
-          <div>
-            <p>No MIDI access</p>
-          </div>
-        )}
-        <button
-          onClick={() =>
-            textScrolling({
-              text: "unko",
-              loop: false,
-              speed: 3,
-            })
+        <div>
+          {!midiAccess && (
+            <div>
+              <p>No MIDI access</p>
+            </div>
+          )}
+          <button
+            onClick={() =>
+              textScrolling({
+                text: "unko",
+                loop: false,
+                speed: 3,
+              })
+            }
+          >
+            unko
+          </button>
+          <button
+            onClick={() =>
+              ledLightning({
+                index: 11,
+                type: 2,
+              })
+            }
+          >
+            light button
+          </button>
+        </div>
+        <div>
+          {
+            /*
+            8x8 grid 60x60px square buttons
+            */
+            Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} style={{ display: "flex" }}>
+                {Array.from({ length: 8 }).map((_, j) => (
+                  <div
+                    key={j}
+                    style={{
+                      width: 60,
+                      height: 60,
+                      border: "1px solid black",
+                    }}
+                  ></div>
+                ))}
+              </div>
+            ))
           }
-        >
-          unko
-        </button>
-        <button
-          onClick={() =>
-            ledLightning({
-              index: 11,
-              type: 2,
-            })
-          }
-        >
-          light button
-        </button>
+        </div>
       </div>
     </>
   );
