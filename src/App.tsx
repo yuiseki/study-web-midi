@@ -256,7 +256,10 @@ function App() {
                       height: 60,
                       border: "1px solid black",
                       backgroundColor:
-                        lastEvent && lastEvent[1] === parseInt(`${i}${j}`)
+                        i + 1 === 9 || j + 1 === 9
+                          ? "gray"
+                          : lastEvent &&
+                            lastEvent[1] - 25 === parseInt(`${i + 1}${j + 1}`)
                           ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
                           : "white",
                     }}
