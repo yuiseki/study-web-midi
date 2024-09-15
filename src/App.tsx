@@ -225,22 +225,33 @@ function App() {
             light button
           </button>
         </div>
-        <div>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column-reverse",
+          }}
+        >
           {
             /*
             8x8 grid 60x60px square buttons
             */
-            Array.from({ length: 8 }).map((_, i) => (
+            Array.from({ length: 9 }).map((_, i) => (
               <div key={i} style={{ display: "flex" }}>
-                {Array.from({ length: 8 }).map((_, j) => (
+                {Array.from({ length: 9 }).map((_, j) => (
                   <div
                     key={j}
                     style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
                       width: 60,
                       height: 60,
                       border: "1px solid black",
                     }}
-                  ></div>
+                  >
+                    {i + 1}
+                    {j + 1}
+                  </div>
                 ))}
               </div>
             ))
