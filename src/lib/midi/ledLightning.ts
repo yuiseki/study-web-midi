@@ -1,4 +1,4 @@
-import { dictionary } from "./dictionary";
+import { spec } from "./spec";
 
 export const ledLightning = (params: {
   // MIDI outputs
@@ -24,9 +24,9 @@ export const ledLightning = (params: {
     return;
   }
   const output = midiOutputs[0];
-  const header = dictionary.sysEx.header;
-  const footer = dictionary.sysEx.footer;
-  const command = dictionary.commands.ledLightning;
+  const header = spec.sysEx.header;
+  const footer = spec.sysEx.footer;
+  const command = spec.commands.ledLightning;
   const typeValue = type;
   if (typeValue === 0 || typeValue === 2) {
     const colorValue = color;

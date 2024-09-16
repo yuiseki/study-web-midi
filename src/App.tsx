@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
 import { ledLightning } from "./lib/midi/ledLightning";
+import { spec } from "./lib/midi/spec";
+import { programmerMode } from "./lib/midi/programmerMode";
 
 function App() {
   const callOnce = useRef(false);
@@ -11,9 +13,6 @@ function App() {
   );
   const [midiInputs, setMIDIInputs] = useState<MIDIInput[]>([]);
   const [midiOutputs, setMIDIOutputs] = useState<MIDIOutput[]>([]);
-  const [youtubeVideoId, setYoutubeVideoId] = useState<string | undefined>(
-    undefined
-  );
 
   useEffect(() => {
     if (!callOnce.current) {
@@ -61,25 +60,34 @@ function App() {
     }
   }, []);
 
-  // Listen to MIDI messages
+  // Switch to programmer mode
+  // And listen to MIDI messages
   useEffect(() => {
     if (!midiInputs.length) {
       return;
     }
+    if (!midiOutputs.length) {
+      return;
+    }
+
+    programmerMode({
+      midiOutputs,
+      mode: 1,
+    });
 
     const onMIDIMessage = (event: MIDIMessageEvent) => {
       console.log("onMIDIEvent", event.data);
       if (!event.data) {
         return;
       }
-      console.log(event.data[1] - 25);
-      // event.data[1] - 25 means button index
+      console.log(event.data[1]);
+      // event.data[1] means button index
       // event.data[2] === 0 means note is off
       if (event.data[2] === 0) {
         setLastEvent(undefined);
         ledLightning({
           midiOutputs,
-          index: event.data[1] - 25,
+          index: event.data[1],
           type: 0,
           color: 0,
         });
@@ -87,15 +95,9 @@ function App() {
         setLastEvent(event.data);
         ledLightning({
           midiOutputs,
-          index: event.data[1] - 25,
+          index: event.data[1],
           type: 0,
         });
-        if (event.data[1] - 25 === 11) {
-          setYoutubeVideoId("dQw4w9WgXcQ");
-        }
-        if (event.data[1] - 25 === 12) {
-          setYoutubeVideoId("-qm27ekNEOM");
-        }
       }
     };
 
@@ -106,25 +108,6 @@ function App() {
 
   return (
     <>
-      <div
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          zIndex: -1,
-        }}
-      >
-        {youtubeVideoId && (
-          <iframe
-            width="1280"
-            height="720"
-            src={`https://www.youtube.com/embed/${youtubeVideoId}?autoplay=1&mute=1&controls=0&iv_load_policy=3&modestbranding=1&showinfo=0&loop=1&rel=0&playlist=${youtubeVideoId}`}
-            title="YouTube video player"
-            frameBorder={0}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          ></iframe>
-        )}
-      </div>
       <div
         style={{
           height: "100vh",
@@ -145,40 +128,42 @@ function App() {
         <div
           style={{
             display: "flex",
-            flexDirection: "column-reverse",
+            flexDirection: "column",
           }}
         >
           {
             /*
             8x8 grid 60x60px square buttons
             */
-            Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} style={{ display: "flex" }}>
-                {Array.from({ length: 9 }).map((_, j) => (
-                  <div
-                    key={j}
-                    style={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      width: 60,
-                      height: 60,
-                      border: "1px solid black",
-                      backgroundColor:
-                        i + 1 === 9 || j + 1 === 9
-                          ? "gray"
-                          : lastEvent &&
-                            lastEvent[1] - 25 === parseInt(`${i + 1}${j + 1}`)
-                          ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
-                          : "white",
-                    }}
-                  >
-                    {i + 1}
-                    {j + 1}
-                  </div>
-                ))}
-              </div>
-            ))
+            spec.outputIndex.map((row, i) => {
+              return (
+                <div key={i} style={{ display: "flex" }}>
+                  {row.map((col, j) => {
+                    return (
+                      <div
+                        key={j}
+                        style={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          width: 60,
+                          height: 60,
+                          border: "1px solid black",
+                          backgroundColor:
+                            i === 0 || j === 8
+                              ? "gray"
+                              : lastEvent && lastEvent[1] === col
+                              ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
+                              : "white",
+                        }}
+                      >
+                        {col}
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })
           }
         </div>
       </div>

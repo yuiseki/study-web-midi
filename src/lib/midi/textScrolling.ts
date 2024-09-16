@@ -1,4 +1,4 @@
-import { dictionary } from "./dictionary";
+import { spec } from "./spec";
 
 export const textScrolling = (params: {
   // MIDI outputs
@@ -24,9 +24,9 @@ export const textScrolling = (params: {
     return;
   }
   const output = midiOutputs[0];
-  const header = dictionary.sysEx.header;
-  const footer = dictionary.sysEx.footer;
-  const command = dictionary.commands.textScrolling;
+  const header = spec.sysEx.header;
+  const footer = spec.sysEx.footer;
+  const command = spec.commands.textScrolling;
   const colorValue = color;
   const loopValue = loop ? 1 : 0;
   const speedValue = speed;
