@@ -14,6 +14,7 @@ function App() {
   const [midiInputs, setMIDIInputs] = useState<MIDIInput[]>([]);
   const [midiOutputs, setMIDIOutputs] = useState<MIDIOutput[]>([]);
 
+  // Initialize MIDI device
   useEffect(() => {
     if (!callOnce.current) {
       console.log("This will only be called once");
@@ -60,8 +61,7 @@ function App() {
     }
   }, []);
 
-  // Switch to programmer mode
-  // And listen to MIDI messages
+  // Switch to programmer mode and listen to MIDI messages
   useEffect(() => {
     if (!midiInputs.length) {
       return;
