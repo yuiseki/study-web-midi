@@ -139,43 +139,39 @@ function App() {
         <div
           style={{
             display: "flex",
+            gap: "3px",
             flexDirection: "column",
           }}
         >
-          {
-            /*
-            8x8 grid 60x60px square buttons
-            */
-            spec.outputIndex.map((row, i) => {
-              return (
-                <div key={i} style={{ display: "flex" }}>
-                  {row.map((col, j) => {
-                    return (
-                      <div
-                        key={j}
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                          width: 60,
-                          height: 60,
-                          border: "1px solid black",
-                          backgroundColor:
-                            i === 0 || j === 8
-                              ? "gray"
-                              : lastEvent && lastEvent[1] === col
-                              ? "lightblue"
-                              : "white",
-                        }}
-                      >
-                        {col}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })
-          }
+          {spec.outputIndex.map((row, i) => {
+            return (
+              <div key={i} style={{ display: "flex", gap: "2px" }}>
+                {row.map((col, j) => {
+                  return (
+                    <div
+                      key={j}
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: 50,
+                        height: 50,
+                        border: "1px solid black",
+                        backgroundColor:
+                          i === 0 || j === 8
+                            ? "gray"
+                            : lastEvent && lastEvent[1] === col
+                            ? "lightblue"
+                            : "white",
+                      }}
+                    >
+                      {col}
+                    </div>
+                  );
+                })}
+              </div>
+            );
+          })}
         </div>
       </div>
     </>
