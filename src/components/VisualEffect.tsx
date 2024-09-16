@@ -97,8 +97,8 @@ const SineWave: React.FC<{
   const geometry = useMemo(() => {
     const points = Array.from(timeDataArray).map((value, i) => {
       return new THREE.Vector3(
-        i / timeDataArray.length,
-        (value - 128) / 128,
+        (i / timeDataArray.length) * 14 - 7,
+        ((value - 128) / 128) * 1,
         0
       );
     });
@@ -115,6 +115,7 @@ const SineWave: React.FC<{
     <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />
   );
 };
+
 export const VisualEffect: React.FC<{
   // 11 to 99
   index: number;
