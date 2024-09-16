@@ -23,14 +23,14 @@ function App() {
     undefined
   );
   const analyser = useRef<AnalyserNode | undefined>(undefined);
-  const bufferLength = useRef<number | undefined>(undefined);
+  const animationId = useRef<number | undefined>(undefined);
+  // Analyzed data
   const [freqDataArray, setFreqDataArray] = useState<Uint8Array | undefined>(
     undefined
   );
   const [timeDataArray, setTimeDataArray] = useState<Uint8Array | undefined>(
     undefined
   );
-  const animationId = useRef<number | undefined>(undefined);
 
   // Initialize Audio device
   useEffect(() => {
@@ -60,8 +60,7 @@ function App() {
       const source = newAudioContext.createMediaStreamSource(stream);
 
       analyser.current = newAudioContext.createAnalyser();
-      analyser.current.fftSize = 32;
-      bufferLength.current = analyser.current.frequencyBinCount;
+      analyser.current.fftSize = 64;
 
       source.connect(analyser.current);
       console.info("Audio initialized");
@@ -197,7 +196,11 @@ function App() {
           </div>
           <div>{lastEvent && <VisualEffect index={lastEvent[1]} />}</div>
         </div>
-        <div>
+        <div
+          style={{
+            marginBottom: "4px",
+          }}
+        >
           {freqDataArray && timeDataArray && (
             <AudioVisualizer
               freqDataArray={freqDataArray}

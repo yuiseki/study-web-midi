@@ -35,7 +35,7 @@ export const AudioVisualizer: React.FC<{
             gap: "4px",
             justifyContent: "start",
             alignItems: "flex-end",
-            height: "100px",
+            height: "60px",
           }}
         >
           {Array.from(timeDataArray).map((value, i) => {
@@ -44,7 +44,7 @@ export const AudioVisualizer: React.FC<{
                 key={i}
                 style={{
                   width: "4px",
-                  height: value - 64,
+                  height: (value - 128) ^ 8,
                   backgroundColor: `rgb(${value}, ${255 - value}, 0)`,
                 }}
               ></div>
