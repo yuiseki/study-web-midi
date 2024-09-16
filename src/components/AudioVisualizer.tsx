@@ -15,6 +15,8 @@ export const AudioVisualizer: React.FC<{
           }}
         >
           {Array.from(freqDataArray).map((value, i) => {
+            // 1/4に間引く
+            if (i % 4 !== 0) return null;
             return (
               <div
                 key={i}
@@ -39,6 +41,8 @@ export const AudioVisualizer: React.FC<{
           }}
         >
           {Array.from(timeDataArray).map((value, i) => {
+            // 1/8に間引く
+            if (i % 8 !== 0) return null;
             return (
               <div
                 key={i}
