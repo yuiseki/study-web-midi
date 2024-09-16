@@ -2,9 +2,54 @@ import * as THREE from "three";
 import { Canvas, useFrame, ThreeElements } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 
-const Box: React.FC<ThreeElements["mesh"]> = (props) => {
+type rotateDirection = "x" | "-x" | "y" | "-y" | "z" | "-z";
+
+const updateFrame = (
+  ref: React.MutableRefObject<THREE.Mesh>,
+  delta: number,
+  rotateDirection: rotateDirection
+) => {
+  switch (rotateDirection) {
+    case "x":
+      ref.current.rotation.x += delta;
+      ref.current.rotation.y = 0;
+      ref.current.rotation.z = 0;
+      break;
+    case "-x":
+      ref.current.rotation.x -= delta;
+      ref.current.rotation.y = 0;
+      ref.current.rotation.z = 0;
+      break;
+    case "y":
+      ref.current.rotation.y += delta;
+      ref.current.rotation.x = 0;
+      ref.current.rotation.z = 0;
+      break;
+    case "-y":
+      ref.current.rotation.y -= delta;
+      ref.current.rotation.x = 0;
+      ref.current.rotation.z = 0;
+      break;
+    case "z":
+      ref.current.rotation.z += delta;
+      ref.current.rotation.x = 0;
+      ref.current.rotation.y = 0;
+      break;
+    case "-z":
+      ref.current.rotation.z -= delta;
+      ref.current.rotation.x = 0;
+      ref.current.rotation.y = 0;
+      break;
+  }
+};
+
+const Box: React.FC<
+  ThreeElements["mesh"] & { rotateDirection: rotateDirection }
+> = (props) => {
   const ref = useRef<THREE.Mesh>(null!);
-  useFrame((_state, delta) => (ref.current.rotation.x += delta));
+  useFrame((_state, delta) => {
+    updateFrame(ref, delta, props.rotateDirection);
+  });
   return (
     <mesh {...props} ref={ref}>
       <boxGeometry args={[1, 1, 1]} />
@@ -13,9 +58,13 @@ const Box: React.FC<ThreeElements["mesh"]> = (props) => {
   );
 };
 
-const Sphere: React.FC<ThreeElements["mesh"]> = (props) => {
+const Sphere: React.FC<
+  ThreeElements["mesh"] & { rotateDirection: rotateDirection }
+> = (props) => {
   const ref = useRef<THREE.Mesh>(null!);
-  useFrame((_state, delta) => (ref.current.rotation.x += delta));
+  useFrame((_state, delta) => {
+    updateFrame(ref, delta, props.rotateDirection);
+  });
   return (
     <mesh {...props} ref={ref}>
       <sphereGeometry args={[1, 6, 2]} />
@@ -33,6 +82,7 @@ export const VisualEffect: React.FC<{
   const firstNumber = Math.floor(index / 10);
   const secondNumber = index % 10;
   const [scale, setScale] = useState(1);
+  const [rotateDirection, setRotateDirection] = useState<rotateDirection>("x");
 
   useEffect(() => {
     if (freqDataArray) {
@@ -40,6 +90,61 @@ export const VisualEffect: React.FC<{
       setScale(sum / freqDataArray.length / 32);
     }
   }, [freqDataArray]);
+
+  useEffect(() => {
+    if (firstNumber) {
+      switch (firstNumber) {
+        case 1:
+          setRotateDirection("x");
+          break;
+        case 2:
+          setRotateDirection("-x");
+          break;
+        case 3:
+          setRotateDirection("y");
+          break;
+        case 4:
+          setRotateDirection("-y");
+          break;
+        case 5:
+          setRotateDirection("z");
+          break;
+        case 6:
+          setRotateDirection("-z");
+          break;
+        case 7:
+          setRotateDirection("x");
+          break;
+        case 8:
+          setRotateDirection("-x");
+          break;
+      }
+    }
+  }, [firstNumber]);
+
+  let object = (
+    <Box position={[0, 0, 0]} scale={scale} rotateDirection={rotateDirection} />
+  );
+  switch (secondNumber) {
+    case 1:
+      object = (
+        <Box
+          position={[0, 0, 0]}
+          scale={scale}
+          rotateDirection={rotateDirection}
+        />
+      );
+      break;
+    case 2:
+      object = (
+        <Sphere
+          position={[0, 0, 0]}
+          scale={scale}
+          rotateDirection={rotateDirection}
+        />
+      );
+      break;
+  }
 
   return (
     <div
@@ -64,11 +169,7 @@ export const VisualEffect: React.FC<{
           intensity={Math.PI}
         />
         <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
-        {secondNumber % 2 ? (
-          <Sphere position={[0, 0, 1]} scale={scale} />
-        ) : (
-          <Box position={[0, 0, 1]} scale={scale} />
-        )}
+        {object}
       </Canvas>
     </div>
   );
