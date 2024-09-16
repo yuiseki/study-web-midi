@@ -2,27 +2,27 @@ import * as THREE from "three";
 import { Canvas, useFrame, ThreeElements } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 
-function Box(props: ThreeElements["mesh"]) {
+const Box: React.FC<ThreeElements["mesh"]> = (props) => {
   const ref = useRef<THREE.Mesh>(null!);
   useFrame((_state, delta) => (ref.current.rotation.x += delta));
   return (
-    <mesh {...props} ref={ref} scale={1}>
+    <mesh {...props} ref={ref}>
       <boxGeometry args={[1, 1, 1]} />
       <meshBasicMaterial color="white" wireframe={true} />
     </mesh>
   );
-}
+};
 
-function Sphere(props: ThreeElements["mesh"]) {
+const Sphere: React.FC<ThreeElements["mesh"]> = (props) => {
   const ref = useRef<THREE.Mesh>(null!);
   useFrame((_state, delta) => (ref.current.rotation.x += delta));
   return (
-    <mesh {...props} ref={ref} scale={1}>
+    <mesh {...props} ref={ref}>
       <sphereGeometry args={[1, 6, 2]} />
       <meshBasicMaterial color="white" wireframe={true} />
     </mesh>
   );
-}
+};
 
 export const VisualEffect: React.FC<{
   // 11 to 99
@@ -65,9 +65,9 @@ export const VisualEffect: React.FC<{
         />
         <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
         {secondNumber % 2 ? (
-          <Sphere position={[0, 0, scale]} />
+          <Sphere position={[0, 0, 1]} scale={scale} />
         ) : (
-          <Box position={[0, 0, scale]} />
+          <Box position={[0, 0, 1]} scale={scale} />
         )}
       </Canvas>
     </div>
