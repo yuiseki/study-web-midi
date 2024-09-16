@@ -7,7 +7,7 @@ import { programmerMode } from "./lib/midi/programmerMode";
 import { VisualEffect } from "./components/VisualEffect";
 
 function App() {
-  const callOnce = useRef(false);
+  const initializedMIDI = useRef(false);
   const [lastEvent, setLastEvent] = useState<Uint8Array | undefined>(undefined);
   const [midiAccess, setMIDIAccess] = useState<MIDIAccess | undefined>(
     undefined
@@ -15,14 +15,74 @@ function App() {
   const [midiInputs, setMIDIInputs] = useState<MIDIInput[]>([]);
   const [midiOutputs, setMIDIOutputs] = useState<MIDIOutput[]>([]);
 
+  const initializedAudio = useRef(false);
+  const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
+    undefined
+  );
+  const analyser = useRef<AnalyserNode | undefined>(undefined);
+  const bufferLength = useRef<number | undefined>(undefined);
+  const [timeDataArray, setTimeDataArray] = useState<Uint8Array | undefined>(
+    undefined
+  );
+  const [freqDataArray, setFreqDataArray] = useState<Uint8Array | undefined>(
+    undefined
+  );
+
+  const analyzeAudioData = () => {
+    if (!analyser.current) return;
+
+    const newTimeDataArray = new Uint8Array(analyser.current.fftSize);
+    const newFreqDataArray = new Uint8Array(analyser.current.frequencyBinCount);
+
+    const update = () => {
+      if (!analyser.current) return;
+
+      analyser.current.getByteTimeDomainData(newTimeDataArray);
+      setTimeDataArray(newTimeDataArray);
+      analyser.current.getByteFrequencyData(newFreqDataArray);
+      setFreqDataArray(newFreqDataArray);
+
+      requestAnimationFrame(update);
+    };
+
+    update();
+  };
+
+  // Initialize Audio device
+  useEffect(() => {
+    const init = async () => {
+      const newAudioContext = new AudioContext();
+      setAudioContext(newAudioContext);
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+        video: false,
+      });
+      const source = newAudioContext.createMediaStreamSource(stream);
+
+      analyser.current = newAudioContext.createAnalyser();
+      analyser.current.fftSize = 32;
+      bufferLength.current = analyser.current.frequencyBinCount;
+
+      source.connect(analyser.current);
+      console.info("Audio initialized");
+      analyzeAudioData();
+    };
+    if (!initializedAudio.current) {
+      initializedAudio.current = true;
+      void init();
+    }
+    return () => {
+      audioContext?.close();
+    };
+  }, [audioContext]);
+
   // Initialize MIDI device
   useEffect(() => {
-    if (!callOnce.current) {
-      console.log("This will only be called once");
-      callOnce.current = true;
+    if (!initializedMIDI.current) {
+      initializedMIDI.current = true;
 
       const onMIDISuccess = (newMIDI: MIDIAccess) => {
-        console.log("onMIDISuccess");
+        console.info("onMIDISuccess");
         const midi = newMIDI;
         setMIDIAccess(midi);
 
@@ -136,6 +196,30 @@ function App() {
           </div>
           <div>{lastEvent && <VisualEffect index={lastEvent[1]} />}</div>
         </div>
+        <div>
+          {
+            /*
+            audio level meter by simple div
+            */
+            timeDataArray && freqDataArray && (
+              <div style={{ display: "flex", gap: "2px" }}>
+                {Array.from(timeDataArray).map((value, i) => {
+                  console.log(value);
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        width: 2,
+                        height: value,
+                        backgroundColor: "blue",
+                      }}
+                    ></div>
+                  );
+                })}
+              </div>
+            )
+          }
+        </div>
         <div
           style={{
             display: "flex",
@@ -163,6 +247,7 @@ function App() {
                             : lastEvent && lastEvent[1] === col
                             ? "lightblue"
                             : "white",
+                        userSelect: "none",
                       }}
                     >
                       {col}
