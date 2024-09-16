@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useRef, useState } from "react";
 import "./App.css";
-import { ledLightning } from "./lib/midi/ledLightning";
 import { spec } from "./lib/midi/spec";
+import { ledLightning } from "./lib/midi/ledLightning";
 import { programmerMode } from "./lib/midi/programmerMode";
+import { VisualEffect } from "./components/VisualEffect";
 
 function App() {
   const callOnce = useRef(false);
@@ -84,7 +85,7 @@ function App() {
       // event.data[1] means button index
       // event.data[2] === 0 means note is off
       if (event.data[2] === 0) {
-        setLastEvent(undefined);
+        //setLastEvent(undefined);
         ledLightning({
           midiOutputs,
           index: event.data[1],
@@ -119,12 +120,21 @@ function App() {
           alignItems: "flex-end",
         }}
       >
-        <div>
-          {!midiAccess && (
-            <div>
-              <p>No MIDI access</p>
-            </div>
-          )}
+        <div
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+          }}
+        >
+          <div>
+            {!midiAccess && (
+              <div>
+                <p>No MIDI access</p>
+              </div>
+            )}
+          </div>
+          <div>{lastEvent && <VisualEffect index={lastEvent[1]} />}</div>
         </div>
         <div
           style={{
