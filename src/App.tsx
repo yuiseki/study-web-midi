@@ -97,6 +97,7 @@ function App() {
           midiOutputs,
           index: event.data[1],
           type: 0,
+          color: event.data[1],
         });
       }
     };
