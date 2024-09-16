@@ -5,6 +5,7 @@ import { spec } from "./lib/midi/spec";
 import { ledLightning } from "./lib/midi/ledLightning";
 import { programmerMode } from "./lib/midi/programmerMode";
 import { VisualEffect } from "./components/VisualEffect";
+import { AudioVisualizer } from "./components/AudioVisualizer";
 
 function App() {
   // MIDI
@@ -197,58 +198,11 @@ function App() {
           <div>{lastEvent && <VisualEffect index={lastEvent[1]} />}</div>
         </div>
         <div>
-          {
-            /*
-            audio level meter by simple div
-            */
-            freqDataArray && (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "4px",
-                  justifyContent: "start",
-                  alignItems: "flex-end",
-                  height: "100px",
-                }}
-              >
-                {Array.from(freqDataArray).map((value, i) => {
-                  return (
-                    <div
-                      key={i}
-                      style={{
-                        width: "4px",
-                        height: value,
-                        backgroundColor: `rgb(${value}, ${255 - value}, 0)`,
-                      }}
-                    ></div>
-                  );
-                })}
-              </div>
-            )
-          }
-          {timeDataArray && (
-            <div
-              style={{
-                display: "flex",
-                gap: "4px",
-                justifyContent: "start",
-                alignItems: "flex-end",
-                height: "100px",
-              }}
-            >
-              {Array.from(timeDataArray).map((value, i) => {
-                return (
-                  <div
-                    key={i}
-                    style={{
-                      width: "4px",
-                      height: value - 64,
-                      backgroundColor: `rgb(${value}, ${255 - value}, 0)`,
-                    }}
-                  ></div>
-                );
-              })}
-            </div>
+          {freqDataArray && timeDataArray && (
+            <AudioVisualizer
+              freqDataArray={freqDataArray}
+              timeDataArray={timeDataArray}
+            />
           )}
         </div>
         <div
