@@ -10,12 +10,12 @@ import { AudioVisualizer } from "./components/AudioVisualizer";
 function App() {
   // MIDI
   const initializedMIDI = useRef(false);
-  const [lastEvent, setLastEvent] = useState<Uint8Array | undefined>(undefined);
   const [midiAccess, setMIDIAccess] = useState<MIDIAccess | undefined>(
     undefined
   );
   const [midiInputs, setMIDIInputs] = useState<MIDIInput[]>([]);
   const [midiOutputs, setMIDIOutputs] = useState<MIDIOutput[]>([]);
+  const [lastEvent, setLastEvent] = useState<Uint8Array | undefined>(undefined);
 
   // Audio
   const initializedAudio = useRef(false);
@@ -24,7 +24,7 @@ function App() {
   );
   const analyser = useRef<AnalyserNode | undefined>(undefined);
   const animationId = useRef<number | undefined>(undefined);
-  // Analyzed data
+  // Audio analyzed data
   const [freqDataArray, setFreqDataArray] = useState<Uint8Array | undefined>(
     undefined
   );
@@ -194,11 +194,20 @@ function App() {
               </div>
             )}
           </div>
-          <div>{lastEvent && <VisualEffect index={lastEvent[1]} />}</div>
+          <div>
+            {lastEvent && freqDataArray && timeDataArray && (
+              <VisualEffect
+                index={lastEvent[1]}
+                freqDataArray={freqDataArray}
+                timeDataArray={timeDataArray}
+              />
+            )}
+          </div>
         </div>
         <div
           style={{
             marginBottom: "4px",
+            marginRight: "4px",
           }}
         >
           {freqDataArray && timeDataArray && (
@@ -213,6 +222,8 @@ function App() {
             display: "flex",
             gap: "3px",
             flexDirection: "column",
+            marginBottom: "4px",
+            marginRight: "4px",
           }}
         >
           {spec.outputIndex.map((row, i) => {

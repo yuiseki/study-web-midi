@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Canvas, useFrame, ThreeElements } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 function Box(props: ThreeElements["mesh"]) {
   const ref = useRef<THREE.Mesh>(null!);
@@ -27,9 +27,19 @@ function Sphere(props: ThreeElements["mesh"]) {
 export const VisualEffect: React.FC<{
   // 11 to 99
   index: number;
-}> = ({ index }) => {
+  freqDataArray: Uint8Array;
+  timeDataArray: Uint8Array;
+}> = ({ index, freqDataArray, timeDataArray }) => {
   const firstNumber = Math.floor(index / 10);
   const secondNumber = index % 10;
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    if (freqDataArray) {
+      const sum = freqDataArray.reduce((acc, cur) => acc + cur, 0);
+      setScale(sum / freqDataArray.length / 32);
+    }
+  }, [freqDataArray]);
 
   return (
     <div
@@ -55,9 +65,9 @@ export const VisualEffect: React.FC<{
         />
         <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
         {secondNumber % 2 ? (
-          <Sphere position={[0, 0, (firstNumber * -1) / 2]} />
+          <Sphere position={[0, 0, scale]} />
         ) : (
-          <Box position={[0, 0, (firstNumber * -1) / 2]} />
+          <Box position={[0, 0, scale]} />
         )}
       </Canvas>
     </div>

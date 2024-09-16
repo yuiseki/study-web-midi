@@ -15,6 +15,7 @@ export const AudioVisualizer: React.FC<{
           }}
         >
           {Array.from(freqDataArray).map((value, i) => {
+            console.log(value);
             return (
               <div
                 key={i}
