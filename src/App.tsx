@@ -7,6 +7,7 @@ import { programmerMode } from "./lib/midi/programmerMode";
 import { VisualEffect } from "./components/VisualEffect";
 
 function App() {
+  // MIDI
   const initializedMIDI = useRef(false);
   const [lastEvent, setLastEvent] = useState<Uint8Array | undefined>(undefined);
   const [midiAccess, setMIDIAccess] = useState<MIDIAccess | undefined>(
@@ -15,41 +16,39 @@ function App() {
   const [midiInputs, setMIDIInputs] = useState<MIDIInput[]>([]);
   const [midiOutputs, setMIDIOutputs] = useState<MIDIOutput[]>([]);
 
+  // Audio
   const initializedAudio = useRef(false);
   const [audioContext, setAudioContext] = useState<AudioContext | undefined>(
     undefined
   );
   const analyser = useRef<AnalyserNode | undefined>(undefined);
   const bufferLength = useRef<number | undefined>(undefined);
-  const [timeDataArray, setTimeDataArray] = useState<Uint8Array | undefined>(
-    undefined
-  );
   const [freqDataArray, setFreqDataArray] = useState<Uint8Array | undefined>(
     undefined
   );
-
-  const analyzeAudioData = () => {
-    if (!analyser.current) return;
-
-    const newTimeDataArray = new Uint8Array(analyser.current.fftSize);
-    const newFreqDataArray = new Uint8Array(analyser.current.frequencyBinCount);
-
-    const update = () => {
-      if (!analyser.current) return;
-
-      analyser.current.getByteTimeDomainData(newTimeDataArray);
-      setTimeDataArray(newTimeDataArray);
-      analyser.current.getByteFrequencyData(newFreqDataArray);
-      setFreqDataArray(newFreqDataArray);
-
-      requestAnimationFrame(update);
-    };
-
-    update();
-  };
+  const [timeDataArray, setTimeDataArray] = useState<Uint8Array | undefined>(
+    undefined
+  );
+  const animationId = useRef<number | undefined>(undefined);
 
   // Initialize Audio device
   useEffect(() => {
+    const analyzeAudioData = () => {
+      if (!analyser.current) return;
+
+      const newFreqDataArray = new Uint8Array(
+        analyser.current.frequencyBinCount
+      );
+      analyser.current.getByteFrequencyData(newFreqDataArray);
+      setFreqDataArray(newFreqDataArray);
+
+      const newTimeDataArray = new Uint8Array(analyser.current.fftSize);
+      analyser.current.getByteTimeDomainData(newTimeDataArray);
+      setTimeDataArray(newTimeDataArray);
+
+      animationId.current = requestAnimationFrame(analyzeAudioData);
+    };
+
     const init = async () => {
       const newAudioContext = new AudioContext();
       setAudioContext(newAudioContext);
@@ -73,6 +72,7 @@ function App() {
     }
     return () => {
       audioContext?.close();
+      cancelAnimationFrame(animationId.current!);
     };
   }, [audioContext]);
 
@@ -201,17 +201,24 @@ function App() {
             /*
             audio level meter by simple div
             */
-            timeDataArray && freqDataArray && (
-              <div style={{ display: "flex", gap: "2px" }}>
-                {Array.from(timeDataArray).map((value, i) => {
-                  console.log(value);
+            freqDataArray && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: "4px",
+                  justifyContent: "start",
+                  alignItems: "flex-end",
+                  height: "100px",
+                }}
+              >
+                {Array.from(freqDataArray).map((value, i) => {
                   return (
                     <div
                       key={i}
                       style={{
-                        width: 2,
+                        width: "4px",
                         height: value,
-                        backgroundColor: "blue",
+                        backgroundColor: `rgb(${value}, ${255 - value}, 0)`,
                       }}
                     ></div>
                   );
@@ -219,6 +226,30 @@ function App() {
               </div>
             )
           }
+          {timeDataArray && (
+            <div
+              style={{
+                display: "flex",
+                gap: "4px",
+                justifyContent: "start",
+                alignItems: "flex-end",
+                height: "100px",
+              }}
+            >
+              {Array.from(timeDataArray).map((value, i) => {
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      width: "4px",
+                      height: value - 64,
+                      backgroundColor: `rgb(${value}, ${255 - value}, 0)`,
+                    }}
+                  ></div>
+                );
+              })}
+            </div>
+          )}
         </div>
         <div
           style={{
