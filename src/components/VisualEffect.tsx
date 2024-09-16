@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { Canvas, useFrame, ThreeElements } from "@react-three/fiber";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type rotateDirection = "x" | "-x" | "y" | "-y" | "z" | "-z";
 
@@ -73,6 +73,48 @@ const Sphere: React.FC<
   );
 };
 
+const Torus: React.FC<
+  ThreeElements["mesh"] & { rotateDirection: rotateDirection }
+> = (props) => {
+  const ref = useRef<THREE.Mesh>(null!);
+  useFrame((_state, delta) => {
+    updateFrame(ref, delta, props.rotateDirection);
+  });
+  return (
+    <mesh {...props} ref={ref}>
+      <torusGeometry args={[1, 0.4, 16, 100]} />
+      <meshBasicMaterial color="white" wireframe={true} />
+    </mesh>
+  );
+};
+
+const SineWave: React.FC<{
+  timeDataArray: Uint8Array;
+}> = ({ timeDataArray }) => {
+  const lineRef = useRef();
+
+  // サイン波の頂点データをtimeDataArrayから生成
+  const geometry = useMemo(() => {
+    const points = Array.from(timeDataArray).map((value, i) => {
+      return new THREE.Vector3(
+        i / timeDataArray.length,
+        (value - 128) / 128,
+        0
+      );
+    });
+    // 頂点データからBufferGeometryを生成
+    return new THREE.BufferGeometry().setFromPoints(points);
+  }, [timeDataArray]);
+
+  // マテリアルを生成
+  const material = new THREE.LineBasicMaterial({
+    color: 0xffffff,
+  });
+
+  return (
+    <primitive object={new THREE.Line(geometry, material)} ref={lineRef} />
+  );
+};
 export const VisualEffect: React.FC<{
   // 11 to 99
   index: number;
@@ -143,6 +185,18 @@ export const VisualEffect: React.FC<{
           rotateDirection={rotateDirection}
         />
       );
+      break;
+    case 3:
+      object = (
+        <Torus
+          position={[0, 0, 0]}
+          scale={scale}
+          rotateDirection={rotateDirection}
+        />
+      );
+      break;
+    case 4:
+      object = <SineWave timeDataArray={timeDataArray} />;
       break;
   }
 

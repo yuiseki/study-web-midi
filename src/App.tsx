@@ -60,7 +60,7 @@ function App() {
       const source = newAudioContext.createMediaStreamSource(stream);
 
       analyser.current = newAudioContext.createAnalyser();
-      analyser.current.fftSize = 64;
+      analyser.current.fftSize = 512;
 
       source.connect(analyser.current);
       console.info("Audio initialized");
