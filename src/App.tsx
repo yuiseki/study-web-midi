@@ -1,23 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import "./App.css";
-const dictionary = {
-  sysEx: {
-    header: [240, 0, 32, 41, 2, 12],
-    footer: [247],
-  },
-  commands: {
-    selectLayout: 0,
-    ledLightning: 3,
-    textScrolling: 7,
-    ledBrightness: 8,
-    programmer: 14,
-    daw: 16,
-    dawClear: 18,
-    sessionColor: 20,
-    ledSleep: 9,
-  },
-};
+import { ledLightning } from "./lib/midi/ledLightning";
 
 function App() {
   const callOnce = useRef(false);
@@ -77,90 +61,6 @@ function App() {
     }
   }, []);
 
-  const textScrolling = useCallback(
-    (params: {
-      // Index color, must be between 1 and 127
-      color?: number;
-      // Text to display
-      text?: string;
-      // Show loop the message
-      loop?: boolean;
-      // Speed, max: 7
-      speed?: number;
-    }) => {
-      if (!midiOutputs.length) {
-        console.error("No MIDI outputs available");
-        return;
-      }
-      const { color = 127, text = "unko", loop = false, speed = 7 } = params;
-      const output = midiOutputs[0];
-      const header = dictionary.sysEx.header;
-      const footer = dictionary.sysEx.footer;
-      const command = dictionary.commands.textScrolling;
-      const colorValue = color;
-      const loopValue = loop ? 1 : 0;
-      const speedValue = speed;
-      const textBuffer = new TextEncoder().encode(text);
-      const message = new Uint8Array([
-        ...header,
-        command,
-        loopValue,
-        speedValue,
-        0,
-        colorValue,
-        ...textBuffer,
-        ...footer,
-      ]);
-      output.send(message);
-    },
-    [midiOutputs]
-  );
-
-  const ledLightning = useCallback(
-    (params: {
-      // Lightning Type, 0: Static, 1: Flashing, 2: Pulsing, 3: RGB
-      type?: number;
-      // LED index, must be between 11 and 99
-      index?: number;
-      // Index color, must be between 1 and 127
-      color?: number;
-      // Start index color
-      startColor?: number;
-      // End index color
-      endColor?: number;
-      // RGB color
-      red?: number;
-      green?: number;
-      blue?: number;
-    }) => {
-      if (!midiOutputs.length) {
-        console.error("No MIDI outputs available");
-        return;
-      }
-      const { type = 0, index = 36, color = 127 } = params;
-      const output = midiOutputs[0];
-      const header = dictionary.sysEx.header;
-      const footer = dictionary.sysEx.footer;
-      const command = dictionary.commands.ledLightning;
-      const typeValue = type;
-      if (typeValue === 0 || typeValue === 2) {
-        const colorValue = color;
-        const indexValue = index;
-        const message = new Uint8Array([
-          ...header,
-          command,
-          typeValue,
-          indexValue,
-          colorValue,
-          ...footer,
-        ]);
-        output.send(message);
-        return;
-      }
-    },
-    [midiOutputs]
-  );
-
   // Listen to MIDI messages
   useEffect(() => {
     if (!midiInputs.length) {
@@ -178,6 +78,7 @@ function App() {
       if (event.data[2] === 0) {
         setLastEvent(undefined);
         ledLightning({
+          midiOutputs,
           index: event.data[1] - 25,
           type: 0,
           color: 0,
@@ -185,6 +86,7 @@ function App() {
       } else {
         setLastEvent(event.data);
         ledLightning({
+          midiOutputs,
           index: event.data[1] - 25,
           type: 0,
         });
@@ -200,7 +102,7 @@ function App() {
     for (let i = 0; i < midiInputs.length; i++) {
       midiInputs[i].onmidimessage = onMIDIMessage;
     }
-  }, [ledLightning, midiInputs]);
+  }, [midiInputs, midiOutputs]);
 
   return (
     <>
@@ -239,27 +141,6 @@ function App() {
               <p>No MIDI access</p>
             </div>
           )}
-          <button
-            onClick={() =>
-              textScrolling({
-                text: "unko",
-                loop: false,
-                speed: 3,
-              })
-            }
-          >
-            unko
-          </button>
-          <button
-            onClick={() =>
-              ledLightning({
-                index: 11,
-                type: 2,
-              })
-            }
-          >
-            light button
-          </button>
         </div>
         <div
           style={{
