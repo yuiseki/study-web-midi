@@ -164,7 +164,7 @@ function App() {
                             i === 0 || j === 8
                               ? "gray"
                               : lastEvent && lastEvent[1] === col
-                              ? `rgb(${lastEvent[0]}, ${lastEvent[1]}, ${lastEvent[2]})`
+                              ? "lightblue"
                               : "white",
                         }}
                       >
